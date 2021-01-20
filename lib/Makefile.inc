@@ -30,11 +30,12 @@ LIB_VAUTH_HFILES = vauth/digest.h vauth/ntlm.h vauth/vauth.h
 LIB_VTLS_CFILES = vtls/bearssl.c vtls/gskit.c vtls/gtls.c vtls/keylog.c  \
   vtls/mbedtls.c vtls/mbedtls_threadlock.c vtls/mesalink.c vtls/nss.c    \
   vtls/openssl.c vtls/schannel.c vtls/schannel_verify.c vtls/sectransp.c \
-  vtls/vtls.c vtls/wolfssl.c
+  vtls/vtls.c vtls/wolfssl.c vtls/libnx.c
 
 LIB_VTLS_HFILES = vtls/bearssl.h vtls/gskit.h vtls/gtls.h vtls/keylog.h      \
   vtls/mbedtls.h vtls/mbedtls_threadlock.h vtls/mesalink.h vtls/nssg.h       \
-  vtls/openssl.h vtls/schannel.h vtls/sectransp.h vtls/vtls.h vtls/wolfssl.h
+  vtls/openssl.h vtls/schannel.h vtls/sectransp.h vtls/vtls.h vtls/wolfssl.h \
+  vtls/libnx.h
 
 LIB_VQUIC_CFILES = vquic/ngtcp2.c vquic/quiche.c vquic/vquic.c
 
@@ -61,7 +62,7 @@ LIB_CFILES = altsvc.c amigaos.c asyn-ares.c asyn-thread.c base64.c            \
   socks_gssapi.c socks_sspi.c speedcheck.c splay.c strcase.c strdup.c         \
   strerror.c strtok.c strtoofft.c system_win32.c telnet.c tftp.c timeval.c    \
   transfer.c urlapi.c version.c warnless.c wildcard.c x509asn1.c dynbuf.c     \
-  version_win32.c easyoptions.c easygetopt.c hsts.c
+  version_win32.c easyoptions.c easygetopt.c hsts.c hos.c
 
 LIB_HFILES = altsvc.h amigaos.h arpa_telnet.h asyn.h conncache.h connect.h    \
   content_encoding.h cookie.h curl_addrinfo.h curl_base64.h curl_ctype.h      \
@@ -80,7 +81,7 @@ LIB_HFILES = altsvc.h amigaos.h arpa_telnet.h asyn.h conncache.h connect.h    \
   smb.h smtp.h sockaddr.h socketpair.h socks.h speedcheck.h splay.h strcase.h \
   strdup.h strerror.h strtok.h strtoofft.h system_win32.h telnet.h tftp.h     \
   timeval.h transfer.h urlapi-int.h urldata.h warnless.h wildcard.h           \
-  x509asn1.h dynbuf.h version_win32.h easyoptions.h hsts.h
+  x509asn1.h dynbuf.h version_win32.h easyoptions.h hsts.h hos.h
 
 LIB_RCFILES = libcurl.rc
 
