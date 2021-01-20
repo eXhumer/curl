@@ -722,7 +722,7 @@ static void conn_shutdown(struct Curl_easy *data, struct connectdata *conn)
   infof(data, "Closing connection %ld\n", conn->connection_id);
 
   /* possible left-overs from the async name resolvers */
-  Curl_resolver_cancel(conn);
+  Curl_resolver_cancel(data);
 
   /* close the SSL stuff before we close any sockets since they will/may
      write to the sockets */
@@ -3307,7 +3307,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
       conn->hostname_resolve = strdup(connhost->name);
       if(!conn->hostname_resolve)
         return CURLE_OUT_OF_MEMORY;
-      rc = Curl_resolv_timeout(conn, conn->hostname_resolve, (int)conn->port,
+      rc = Curl_resolv_timeout(data, conn->hostname_resolve, (int)conn->port,
                                &hostaddr, timeout_ms);
       if(rc == CURLRESOLV_PENDING)
         *async = TRUE;
@@ -3332,7 +3332,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
       conn->hostname_resolve = strdup(host->name);
       if(!conn->hostname_resolve)
         return CURLE_OUT_OF_MEMORY;
-      rc = Curl_resolv_timeout(conn, conn->hostname_resolve, (int)conn->port,
+      rc = Curl_resolv_timeout(data, conn->hostname_resolve, (int)conn->port,
                                &hostaddr, timeout_ms);
 
       if(rc == CURLRESOLV_PENDING)

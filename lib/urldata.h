@@ -1092,9 +1092,6 @@ struct connectdata {
   struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif
 
-  /* data used for the asynch name resolve callback */
-  struct Curl_async async;
-
   /* for chunked-encoded trailer */
   struct dynbuf trailer;
 
@@ -1329,6 +1326,9 @@ struct urlpieces {
 struct UrlState {
   /* Points to the connection cache */
   struct conncache *conn_cache;
+
+  /* data used for the asynch name resolve callback */
+  struct Curl_async async;
 
   int retrycount; /* number of retries on a new connection */
 
