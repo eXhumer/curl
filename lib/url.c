@@ -427,7 +427,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->info.wouldredirect);
 
   /* this destroys the channel and we cannot use it anymore after this */
-  Curl_resolver_cleanup(data->state.resolver);
+  Curl_resolver_cleanup(data->state.async.resolver);
 
   Curl_http2_cleanup_dependencies(data);
   Curl_convert_close(data);
@@ -643,7 +643,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
-  result = Curl_resolver_init(data, &data->state.resolver);
+  result = Curl_resolver_init(data, &data->state.async.resolver);
   if(result) {
     DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
     free(data);
@@ -664,7 +664,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   }
 
   if(result) {
-    Curl_resolver_cleanup(data->state.resolver);
+    Curl_resolver_cleanup(data->state.async.resolver);
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     free(data);

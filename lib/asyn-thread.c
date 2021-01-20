@@ -654,7 +654,7 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
   int ret_val = 0;
   timediff_t milli;
   timediff_t ms;
-  struct resdata *reslv = (struct resdata *)data->state.resolver;
+  struct resdata *reslv = (struct resdata *)data->state.async.resolver;
 #ifdef USE_SOCKETPAIR
   struct thread_data *td = data->state.async.tdata;
 #else
@@ -726,7 +726,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
 {
   struct addrinfo hints;
   int pf = PF_INET;
-  struct resdata *reslv = (struct resdata *)data->state.resolver;
+  struct resdata *reslv = (struct resdata *)data->state.async.resolver;
 
   *waitp = 0; /* default to synchronous response */
 

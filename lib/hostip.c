@@ -521,7 +521,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
     if(data->set.resolver_start) {
       int st;
       Curl_set_in_callback(data, true);
-      st = data->set.resolver_start(data->state.resolver, NULL,
+      st = data->set.resolver_start(data->state.async.resolver, NULL,
                                     data->set.resolver_start_client);
       Curl_set_in_callback(data, false);
       if(st)

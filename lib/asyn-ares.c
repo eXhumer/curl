@@ -206,8 +206,8 @@ static void destroy_async_data(struct Curl_async *async);
  */
 void Curl_resolver_cancel(struct Curl_easy *data)
 {
-  if(data && data->state.resolver)
-    ares_cancel((ares_channel)data->state.resolver);
+  if(data && data->state.async.resolver)
+    ares_cancel((ares_channel)data->state.async.resolver);
   destroy_async_data(&data->state.async);
 }
 
@@ -260,13 +260,13 @@ int Curl_resolver_getsock(struct Curl_easy *data,
   struct timeval timebuf;
   struct timeval *timeout;
   long milli;
-  int max = ares_getsock((ares_channel)data->state.resolver,
+  int max = ares_getsock((ares_channel)data->state.async.resolver,
                          (ares_socket_t *)socks, MAX_SOCKSPEREASYHANDLE);
 
   maxtime.tv_sec = CURL_TIMEOUT_RESOLVE;
   maxtime.tv_usec = 0;
 
-  timeout = ares_timeout((ares_channel)data->state.resolver, &maxtime,
+  timeout = ares_timeout((ares_channel)data->state.async.resolver, &maxtime,
                          &timebuf);
   milli = (timeout->tv_sec * 1000) + (timeout->tv_usec/1000);
   if(milli == 0)
@@ -295,7 +295,7 @@ static int waitperform(struct Curl_easy *data, timediff_t timeout_ms)
   int i;
   int num = 0;
 
-  bitmask = ares_getsock((ares_channel)data->state.resolver, socks,
+  bitmask = ares_getsock((ares_channel)data->state.async.resolver, socks,
                          ARES_GETSOCK_MAXNUM);
 
   for(i = 0; i < ARES_GETSOCK_MAXNUM; i++) {
@@ -323,12 +323,12 @@ static int waitperform(struct Curl_easy *data, timediff_t timeout_ms)
   if(!nfds)
     /* Call ares_process() unconditonally here, even if we simply timed out
        above, as otherwise the ares name resolve won't timeout! */
-    ares_process_fd((ares_channel)data->state.resolver, ARES_SOCKET_BAD,
+    ares_process_fd((ares_channel)data->state.async.resolver, ARES_SOCKET_BAD,
                     ARES_SOCKET_BAD);
   else {
     /* move through the descriptors and ask for processing on them */
     for(i = 0; i < num; i++)
-      ares_process_fd((ares_channel)data->state.resolver,
+      ares_process_fd((ares_channel)data->state.async.resolver,
                       (pfd[i].revents & (POLLRDNORM|POLLIN))?
                       pfd[i].fd:ARES_SOCKET_BAD,
                       (pfd[i].revents & (POLLWRNORM|POLLOUT))?
@@ -374,7 +374,7 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
        ARES_ECANCELLED synchronously for all pending responses.  This will
        leave us with res->num_pending == 0, which is perfect for the next
        block. */
-    ares_cancel((ares_channel)data->state.resolver);
+    ares_cancel((ares_channel)data->state.async.resolver);
     DEBUGASSERT(res->num_pending == 0);
   }
 
@@ -445,7 +445,7 @@ CURLcode Curl_resolver_wait_resolv(struct Curl_easy *data,
     store.tv_sec = itimeout/1000;
     store.tv_usec = (itimeout%1000)*1000;
 
-    tvp = ares_timeout((ares_channel)data->state.resolver, &store, &tv);
+    tvp = ares_timeout((ares_channel)data->state.async.resolver, &store, &tv);
 
     /* use the timeout period ares returned to us above if less than one
        second is left, otherwise just use 1000ms to make sure the progress
@@ -479,7 +479,7 @@ CURLcode Curl_resolver_wait_resolv(struct Curl_easy *data,
   }
   if(result)
     /* failure, so we cancel the ares operation */
-    ares_cancel((ares_channel)data->state.resolver);
+    ares_cancel((ares_channel)data->state.async.resolver);
 
   /* Operation complete, if the lookup was successful we now have the entry
      in the cache. */
@@ -672,16 +672,16 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
         res->num_pending = 2;
 
         /* areschannel is already setup in the Curl_open() function */
-        ares_gethostbyname((ares_channel)data->state.resolver, hostname,
+        ares_gethostbyname((ares_channel)data->state.async.resolver, hostname,
                             PF_INET, query_completed_cb, data);
-        ares_gethostbyname((ares_channel)data->state.resolver, hostname,
+        ares_gethostbyname((ares_channel)data->state.async.resolver, hostname,
                             PF_INET6, query_completed_cb, data);
       }
       else {
         res->num_pending = 1;
 
         /* areschannel is already setup in the Curl_open() function */
-        ares_gethostbyname((ares_channel)data->state.resolver, hostname,
+        ares_gethostbyname((ares_channel)data->state.async.resolver, hostname,
                             PF_INET, query_completed_cb, data);
       }
     }
@@ -691,7 +691,8 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
       res->num_pending = 1;
 
       /* areschannel is already setup in the Curl_open() function */
-      ares_gethostbyname((ares_channel)data->state.resolver, hostname, family,
+      ares_gethostbyname((ares_channel)data->state.async.resolver,
+                         hostname, family,
                          query_completed_cb, data);
     }
 
@@ -717,9 +718,10 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
 
 #if (ARES_VERSION >= 0x010704)
 #if (ARES_VERSION >= 0x010b00)
-  ares_result = ares_set_servers_ports_csv(data->state.resolver, servers);
+  ares_result = ares_set_servers_ports_csv(data->state.async.resolver,
+                                           servers);
 #else
-  ares_result = ares_set_servers_csv(data->state.resolver, servers);
+  ares_result = ares_set_servers_csv(data->state.async.resolver, servers);
 #endif
   switch(ares_result) {
   case ARES_SUCCESS:
@@ -749,7 +751,7 @@ CURLcode Curl_set_dns_interface(struct Curl_easy *data,
   if(!interf)
     interf = "";
 
-  ares_set_local_dev((ares_channel)data->state.resolver, interf);
+  ares_set_local_dev((ares_channel)data->state.async.resolver, interf);
 
   return CURLE_OK;
 #else /* c-ares version too old! */
@@ -774,7 +776,8 @@ CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
     }
   }
 
-  ares_set_local_ip4((ares_channel)data->state.resolver, ntohl(a4.s_addr));
+  ares_set_local_ip4((ares_channel)data->state.async.resolver,
+                     ntohl(a4.s_addr));
 
   return CURLE_OK;
 #else /* c-ares version too old! */
@@ -800,7 +803,7 @@ CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
     }
   }
 
-  ares_set_local_ip6((ares_channel)data->state.resolver, a6);
+  ares_set_local_ip6((ares_channel)data->state.async.resolver, a6);
 
   return CURLE_OK;
 #else /* c-ares version too old! */
