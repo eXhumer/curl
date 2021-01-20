@@ -53,7 +53,8 @@ LIB_VTLS_CFILES =           \
   vtls/schannel_verify.c    \
   vtls/sectransp.c          \
   vtls/vtls.c               \
-  vtls/wolfssl.c
+  vtls/wolfssl.c            \
+  vtls/libnx.c
 
 LIB_VTLS_HFILES =           \
   vtls/bearssl.h            \
@@ -68,7 +69,8 @@ LIB_VTLS_HFILES =           \
   vtls/schannel.h           \
   vtls/sectransp.h          \
   vtls/vtls.h               \
-  vtls/wolfssl.h
+  vtls/wolfssl.h            \
+  vtls/libnx.h
 
 LIB_VQUIC_CFILES = \
   vquic/ngtcp2.c   \
@@ -207,7 +209,8 @@ LIB_CFILES =         \
   version_win32.c    \
   warnless.c         \
   wildcard.c         \
-  x509asn1.c
+  x509asn1.c         \
+  hos.c
 
 LIB_HFILES =         \
   altsvc.h           \
@@ -327,7 +330,8 @@ LIB_HFILES =         \
   version_win32.h    \
   warnless.h         \
   wildcard.h         \
-  x509asn1.h
+  x509asn1.h         \
+  hos.h
 
 LIB_RCFILES = libcurl.rc
 
